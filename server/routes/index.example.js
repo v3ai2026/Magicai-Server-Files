@@ -1,7 +1,10 @@
 /**
  * Example Routes Definition
  * 
- * This file shows how to organize and define API routes.
+ * This file shows how to organize and define API routes with proper security.
+ * 
+ * SECURITY: Rate limiting is implemented to prevent abuse and DoS attacks.
+ * See server/middleware/rateLimiter.example.js for rate limiter implementations.
  */
 
 const express = require('express');
@@ -9,17 +12,26 @@ const router = express.Router();
 
 // Import middleware
 const { authenticate, requireAdmin } = require('../middleware/auth.example');
+const { 
+  apiLimiter, 
+  authLimiter, 
+  uploadLimiter, 
+  aiLimiter 
+} = require('../middleware/rateLimiter.example');
 
 // Import controllers
 const UserController = require('../controllers/UserController.example');
 
-// Public routes (no authentication required)
-router.post('/auth/register', (req, res) => {
+// Apply general rate limiting to all routes
+router.use(apiLimiter);
+
+// Public routes (no authentication required, but rate limited)
+router.post('/auth/register', authLimiter, (req, res) => {
   // Registration logic
   res.json({ message: 'Register endpoint' });
 });
 
-router.post('/auth/login', (req, res) => {
+router.post('/auth/login', authLimiter, (req, res) => {
   // Login logic
   res.json({ message: 'Login endpoint' });
 });
@@ -35,8 +47,8 @@ router.delete('/users/:id', authenticate, requireAdmin, (req, res) => {
   res.json({ message: 'Delete user endpoint' });
 });
 
-// File routes
-router.post('/files/upload', authenticate, (req, res) => {
+// File routes (with upload rate limiting)
+router.post('/files/upload', authenticate, uploadLimiter, (req, res) => {
   // File upload logic
   res.json({ message: 'File upload endpoint' });
 });
@@ -56,13 +68,13 @@ router.delete('/files/:id', authenticate, (req, res) => {
   res.json({ message: 'Delete file endpoint' });
 });
 
-// AI routes
-router.post('/ai/chat', authenticate, (req, res) => {
+// AI routes (with AI-specific rate limiting)
+router.post('/ai/chat', authenticate, aiLimiter, (req, res) => {
   // AI chat logic
   res.json({ message: 'AI chat endpoint' });
 });
 
-router.post('/ai/generate', authenticate, (req, res) => {
+router.post('/ai/generate', authenticate, aiLimiter, (req, res) => {
   // AI generation logic
   res.json({ message: 'AI generate endpoint' });
 });
