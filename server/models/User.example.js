@@ -55,6 +55,14 @@ class User {
     // Database delete logic here
     // Example: return await db.query('DELETE FROM users WHERE id = ?', [id]);
   }
+
+  static async findAll(options = {}) {
+    // Database query logic with pagination
+    // Example: return await db.query('SELECT * FROM users LIMIT ? OFFSET ?', [options.limit, options.offset]);
+    const { limit = 10, offset = 0 } = options;
+    // Implementation would go here
+    return [];
+  }
 }
 
 module.exports = User;

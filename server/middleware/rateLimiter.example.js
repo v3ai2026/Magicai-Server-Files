@@ -73,8 +73,23 @@ const aiLimiter = rateLimit({
 /**
  * Dynamic rate limiter based on user tier
  * Example of more sophisticated rate limiting
+ * 
+ * Usage:
+ * const getUserTier = async (userId) => {
+ *   // Fetch user tier from database
+ *   return 'premium'; // or 'free', 'basic', 'enterprise'
+ * };
+ * const dynamicLimiter = createDynamicLimiter(getUserTier);
+ * router.use(dynamicLimiter);
+ * 
+ * @param {Function} getUserTier - Async function that takes userId and returns tier
+ * @returns {Function} Rate limiter middleware
  */
 const createDynamicLimiter = (getUserTier) => {
+  if (typeof getUserTier !== 'function') {
+    throw new Error('getUserTier must be a function that returns a user tier');
+  }
+  
   return rateLimit({
     windowMs: 60 * 60 * 1000, // 1 hour
     max: async (req) => {

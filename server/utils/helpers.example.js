@@ -61,11 +61,17 @@ const formatFileSize = (bytes) => {
 const generateUniqueFilename = (originalName) => {
   const timestamp = Date.now();
   const random = generateRandomString(8);
-  const extension = originalName.split('.').pop();
-  const baseName = originalName.split('.').slice(0, -1).join('.');
-  const sanitizedBaseName = sanitizeFilename(baseName);
   
-  return `${sanitizedBaseName}-${timestamp}-${random}.${extension}`;
+  // Handle files with and without extensions
+  const parts = originalName.split('.');
+  const hasExtension = parts.length > 1 && parts[parts.length - 1].length > 0;
+  const extension = hasExtension ? parts.pop() : '';
+  const baseName = parts.join('.');
+  const sanitizedBaseName = sanitizeFilename(baseName) || 'file';
+  
+  return hasExtension 
+    ? `${sanitizedBaseName}-${timestamp}-${random}.${extension}`
+    : `${sanitizedBaseName}-${timestamp}-${random}`;
 };
 
 /**
